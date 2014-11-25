@@ -1,0 +1,22 @@
+{
+  "name": "remarkable-classy",
+  "version": "0.0.1",
+  "description": "Easily add classes to your markdown",
+  "main": "index.js",
+  "author": "Andrey Pissantchev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrey-p/remarkable-classy.git"
+  },
+  "keywords": [
+    "remarkable-plugin"
+  ],
+  "devDependencies": {
+    "mocha": "^2.0.1",
+    "should": "^4.3.0"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha -R spec test/classy.js"
+  }
+}
