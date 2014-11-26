@@ -1,3 +1,12 @@
+var classy,
+  renderersToReplace = [
+    {
+      tagName: "p",
+      methodName: "paragraph_open"
+    }
+  ],
+  replacedMethods = {};
+
 function isValidClassChar(code) {
   return (code >= 0x30 /* 0 */ && code <= 0x39 /* 9 */) ||
     (code >= 0x41 /* A */ && code <= 0x5A /* Z */) ||
@@ -7,58 +16,61 @@ function isValidClassChar(code) {
     code === 0x20 /*   <- space */;
 }
 
-var classy = function (md, options) {
-  md.inline.ruler.push("classy", function (state, silent) {
-    var pos = state.pos,
-      posMax = state.posMax,
-      classString = "";
+function parse(state, silent) {
+  var pos = state.pos,
+    posMax = state.posMax,
+    classString = "";
 
-    if (state.src.charCodeAt(pos) !== 0x7B /* { */) {
-      console.log("no, opening char is not right");
+  if (state.src.charCodeAt(pos) !== 0x7B /* { */) {
+    return false;
+  }
+
+  if (state.src.charCodeAt(posMax - 1) !== 0x7D /* } */) {
+    return false;
+  }
+
+  // advance to account for opening brace
+  pos += 1;
+
+  while (pos < posMax - 1) {
+    if (!isValidClassChar(state.src.charCodeAt(pos))) {
       return false;
     }
 
-    if (state.src.charCodeAt(posMax - 1) !== 0x7D /* } */) {
-      return false;
-    }
-
-    // advance to account for opening brace
+    classString += state.src.charAt(pos);
     pos += 1;
+  }
 
-    while (pos < posMax - 1) {
-      if (!isValidClassChar(state.src.charCodeAt(pos))) {
-        return false;
-      }
+  state.pos = posMax;
 
-      classString += state.src.charAt(pos);
-      pos += 1;
-    }
-
-    state.pos = posMax;
-
-    state.push({
-      type: "classy",
-      level: state.level,
-      content: classString
-    });
-
-    return true;
+  state.push({
+    type: "classy",
+    level: state.level,
+    content: classString
   });
 
-  var paragraph_open = md.renderer.rules.paragraph_open;
+  return true;
+}
 
-  md.renderer.rules.paragraph_open = function (tokens, idx) {
+// replace all rules that we want to enable classy on
+function replaceRenderer(md, tagName, methodName) {
+  replacedMethods[methodName] = md.renderer.rules[methodName];
+
+  md.renderer.rules[methodName] = function (tokens, idx) {
     var classy, result, contents, lastToken;
 
-    result = paragraph_open.apply(null, arguments).trim();
+    // first get the result as per the original method we replaced
+    result = replacedMethods[methodName].apply(null, arguments).trim();
 
     // peer into contents and check if last element is "classy"
     contents = tokens[idx + 1].children;
 
     if (contents[contents.length - 1].type === "classy") {
+      // if yes, add the class(es) to the tag
       classy = contents.pop();
-      result = result.replace("<p", "<p class=\"" + classy.content + "\"");
+      result = result.replace("<" + tagName, "<" + tagName + " class=\"" + classy.content + "\"");
 
+      // might be some cleaning up to do...
       lastToken = contents[contents.length - 1];
       if (lastToken.type === "softbreak") {
         // if the class was added via a newline,
@@ -72,6 +84,14 @@ var classy = function (md, options) {
 
     return result;
   };
+}
+
+classy = function (md, options) {
+  md.inline.ruler.push("classy", parse);
+
+  renderersToReplace.forEach(function (renderer) {
+    replaceRenderer(md, renderer.tagName, renderer.methodName);
+  });
 };
 
 module.exports = classy;
