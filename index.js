@@ -1,9 +1,7 @@
 var classy,
   renderersToReplace = [
-    {
-      tagName: "p",
-      methodName: "paragraph_open"
-    }
+    { tagName: "p", methodName: "paragraph_open" },
+    { tagName: "h\\d", methodName: "heading_open" }
   ],
   replacedMethods = {};
 
@@ -68,7 +66,7 @@ function replaceRenderer(md, tagName, methodName) {
     if (contents[contents.length - 1].type === "classy") {
       // if yes, add the class(es) to the tag
       classy = contents.pop();
-      result = result.replace("<" + tagName, "<" + tagName + " class=\"" + classy.content + "\"");
+      result = result.replace(new RegExp("<" + tagName), "$& class=\"" + classy.content + "\"");
 
       // might be some cleaning up to do...
       lastToken = contents[contents.length - 1];

@@ -17,4 +17,13 @@ describe("remarkable-classy", function () {
   it("shouldn't interpret curly braces in the middle of a paragraph as a class string", function () {
     md.render("foo {bar} baz").should.containEql("<p>foo {bar} baz</p>");
   });
+  it("should work with atx-style headings", function () {
+    md.render("# foo {bar}\n\n baz").should.containEql("<h1 class=\"bar\">foo</h1>");
+  });
+  it("should work with setext-style headings", function () {
+    md.render("foo {bar}\n====\n baz").should.containEql("<h1 class=\"bar\">foo</h1>");
+  });
+  it("should work with em and strong tags");
+  it("should work with li tags and ul tags");
+  it("should work with blockquotes");
 });
