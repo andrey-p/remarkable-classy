@@ -13,11 +13,13 @@
     "remarkable-plugin"
   ],
   "devDependencies": {
+    "jslint": "^0.6.6",
     "mocha": "^2.0.1",
     "remarkable": "^1.4.1",
     "should": "^4.3.0"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha -R spec test/classy.js"
+    "test": "./node_modules/.bin/mocha -R spec test/classy.js",
+    "pretest": "jslint ./*.js && jslint ./test/*.js"
   }
 }
