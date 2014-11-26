@@ -20,6 +20,6 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha -R spec test/classy.js",
-    "pretest": "jslint ./*.js && jslint ./test/*.js"
+    "pretest": "jslint ./*.js && jslint --predef=describe --predef=it --predef=before ./test/*.js"
   }
 }

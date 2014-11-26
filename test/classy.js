@@ -1,3 +1,5 @@
+"use strict";
+
 var should = require("should"),
   classy = require("../"),
   Remarkable = require("remarkable"),

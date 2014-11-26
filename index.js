@@ -1,3 +1,5 @@
+"use strict";
+
 var classy,
   renderersToReplace = [
     { tagName: "p", methodName: "paragraph_open" },
@@ -6,24 +8,24 @@ var classy,
   replacedMethods = {};
 
 function isValidClassChar(code) {
-  return (code >= 0x30 /* 0 */ && code <= 0x39 /* 9 */) ||
-    (code >= 0x41 /* A */ && code <= 0x5A /* Z */) ||
-    (code >= 0x61 /* a */ && code <= 0x7A /* z */) ||
-    code === 0x5F /* _ */ ||
-    code === 0x2D /* - */ ||
-    code === 0x20 /*   <- space */;
+  return (code >= 0x30 && code <= 0x39) || // 0-9
+    (code >= 0x41 && code <= 0x5A) || // A-Z
+    (code >= 0x61 && code <= 0x7A) || // a-z
+    code === 0x5F || // _
+    code === 0x2D || // -
+    code === 0x20; //   <- space
 }
 
-function parse(state, silent) {
+function parse(state) {
   var pos = state.pos,
     posMax = state.posMax,
     classString = "";
 
-  if (state.src.charCodeAt(pos) !== 0x7B /* { */) {
+  if (state.src.charCodeAt(pos) !== 0x7B) { // {
     return false;
   }
 
-  if (state.src.charCodeAt(posMax - 1) !== 0x7D /* } */) {
+  if (state.src.charCodeAt(posMax - 1) !== 0x7D) { // }
     return false;
   }
 
@@ -84,7 +86,7 @@ function replaceRenderer(md, tagName, methodName) {
   };
 }
 
-classy = function (md, options) {
+classy = function (md) {
   md.inline.ruler.push("classy", parse);
 
   renderersToReplace.forEach(function (renderer) {
