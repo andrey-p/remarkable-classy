@@ -3,7 +3,9 @@
 var classy,
   renderersToReplace = [
     { pattern: "p", fullName: "paragraph" },
-    { pattern: "h\\d", fullName: "heading" }
+    { pattern: "h\\d", fullName: "heading" },
+    { pattern: "em", fullName: "em", inline: true },
+    { pattern: "strong", fullName: "strong", inline: true }
   ],
   replacedMethods = {};
 
@@ -82,6 +84,40 @@ function getClassyFromBlockElement(tokens, idx) {
   return classy;
 }
 
+function getClassyFromInlineElement(tokens, idx, fullName) {
+  var classy,
+    closingIdx,
+    startingLevel = tokens[idx].level,
+    i;
+
+  // in an inline element, the opening and closing tags
+  // may have multiple tokens between them
+  // so we need to iterate through the remaining elements
+  // and get the closing tag
+  // the element *before* the closing tag should be "classy"
+
+  for (i = idx; i < tokens.length; i += 1) {
+    if (tokens[i].type === fullName + "_close"
+        && tokens[i].level === startingLevel) {
+      closingIdx = i;
+      break;
+    }
+  }
+
+  if (tokens[closingIdx - 1].type !== "classy") {
+    return null;
+  }
+
+  // we can't remove the classy token
+  // as it'll throw off remarkable's token iteration
+  classy = tokens[closingIdx - 1];
+
+  // some whitespace we may need to trim on the previous element
+  tokens[closingIdx - 2].content = tokens[closingIdx - 2].content.trim();
+
+  return classy;
+}
+
 // replace all rules that we want to enable classy on
 function replaceRenderer(md, renderer) {
   var openMethodName = renderer.fullName + "_open";
@@ -93,7 +129,9 @@ function replaceRenderer(md, renderer) {
     // first get the result as per the original method we replaced
     result = replacedMethods[openMethodName].apply(null, arguments).trim();
 
-    if (!renderer.inline) {
+    if (renderer.inline) {
+      classy = getClassyFromInlineElement(tokens, idx, renderer.fullName);
+    } else {
       classy = getClassyFromBlockElement(tokens, idx);
     }
 
@@ -107,6 +145,9 @@ function replaceRenderer(md, renderer) {
 
 classy = function (md) {
   md.inline.ruler.push("classy", parse);
+
+  // no-op
+  md.renderer.rules.classy = function () { return ""; };
 
   renderersToReplace.forEach(function (renderer) {
     replaceRenderer(md, renderer);

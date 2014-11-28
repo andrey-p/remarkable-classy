@@ -25,7 +25,12 @@ describe("remarkable-classy", function () {
   it("should work with setext-style headings", function () {
     md.render("foo {bar}\n====\n baz").should.containEql("<h1 class=\"bar\">foo</h1>");
   });
-  it("should work with em and strong tags");
+  it("should work with em tags", function () {
+    md.render("_foo {bar}_").should.containEql("<em class=\"bar\">foo</em>");
+  });
+  it("should work with strong tags", function () {
+    md.render("__foo {bar}__").should.containEql("<strong class=\"bar\">foo</strong>");
+  });
   it("should work with li tags and ul tags");
   it("should work with blockquotes");
 });
