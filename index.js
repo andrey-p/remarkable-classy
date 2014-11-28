@@ -2,8 +2,8 @@
 
 var classy,
   renderersToReplace = [
-    { tagName: "p", methodName: "paragraph_open" },
-    { tagName: "h\\d", methodName: "heading_open" }
+    { pattern: "p", fullName: "paragraph" },
+    { pattern: "h\\d", fullName: "heading" }
   ],
   replacedMethods = {};
 
@@ -52,34 +52,53 @@ function parse(state) {
   return true;
 }
 
-// replace all rules that we want to enable classy on
-function replaceRenderer(md, tagName, methodName) {
-  replacedMethods[methodName] = md.renderer.rules[methodName];
+function getClassyFromBlockElement(tokens, idx) {
+  var classy,
+    lastToken,
+    inlineContents = tokens[idx + 1].children;
 
-  md.renderer.rules[methodName] = function (tokens, idx) {
-    var classy, result, contents, lastToken;
+  // in a block element the inline content is always sandwiched
+  // between the opening and the closing tags
+  // so we can just peer into that and check if
+  // the last token of the inline content is "classy"
+
+  if (inlineContents[inlineContents.length - 1].type !== "classy") {
+    return null;
+  }
+
+  classy = inlineContents.pop();
+
+  // might be some cleaning up to do...
+  lastToken = inlineContents[inlineContents.length - 1];
+  if (lastToken.type === "softbreak") {
+    // if the class was added via a newline,
+    // there'll be a rampant \n left
+    inlineContents.pop();
+  } else if (lastToken.type === "text") {
+    // else there might be some whitespace to trim
+    lastToken.content = lastToken.content.trim();
+  }
+
+  return classy;
+}
+
+// replace all rules that we want to enable classy on
+function replaceRenderer(md, renderer) {
+  var openMethodName = renderer.fullName + "_open";
+  replacedMethods[openMethodName] = md.renderer.rules[openMethodName];
+
+  md.renderer.rules[openMethodName] = function (tokens, idx) {
+    var classy, result;
 
     // first get the result as per the original method we replaced
-    result = replacedMethods[methodName].apply(null, arguments).trim();
+    result = replacedMethods[openMethodName].apply(null, arguments).trim();
 
-    // peer into contents and check if last element is "classy"
-    contents = tokens[idx + 1].children;
+    if (!renderer.inline) {
+      classy = getClassyFromBlockElement(tokens, idx);
+    }
 
-    if (contents[contents.length - 1].type === "classy") {
-      // if yes, add the class(es) to the tag
-      classy = contents.pop();
-      result = result.replace(new RegExp("<" + tagName), "$& class=\"" + classy.content + "\"");
-
-      // might be some cleaning up to do...
-      lastToken = contents[contents.length - 1];
-      if (lastToken.type === "softbreak") {
-        // if the class was added via a newline,
-        // there'll be a rampant \n left
-        contents.pop();
-      } else if (lastToken.type === "text") {
-        // else there might be some whitespace to trim
-        lastToken.content = lastToken.content.trim();
-      }
+    if (classy) {
+      result = result.replace(new RegExp("<" + renderer.pattern), "$& class=\"" + classy.content + "\"");
     }
 
     return result;
@@ -90,7 +109,7 @@ classy = function (md) {
   md.inline.ruler.push("classy", parse);
 
   renderersToReplace.forEach(function (renderer) {
-    replaceRenderer(md, renderer.tagName, renderer.methodName);
+    replaceRenderer(md, renderer);
   });
 };
 
