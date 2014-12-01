@@ -59,9 +59,6 @@ _em {classy}_ and __strong {classy}__ are supported as well.
 
 - so
 - are
-- li tags
-  {classy}
-- and
 - ul tags
 {classy}
 
@@ -86,8 +83,6 @@ converts to:
 <ul class="classy">
 	<li>so</li>
 	<li>are</li>
-	<li class="classy">li tags</li>
-	<li>and</li>
 	<li>ul tags</li>
 </ul>
 

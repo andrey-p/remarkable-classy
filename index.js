@@ -4,6 +4,8 @@ var classy,
   renderersToReplace = [
     { pattern: "p", fullName: "paragraph" },
     { pattern: "h\\d", fullName: "heading" },
+    { pattern: "ul", fullName: "bullet_list" },
+    { pattern: "ol", fullName: "ordered_list" },
     { pattern: "em", fullName: "em", inline: true },
     { pattern: "strong", fullName: "strong", inline: true }
   ],
@@ -54,16 +56,29 @@ function parse(state) {
   return true;
 }
 
-function getClassyFromBlockElement(tokens, idx) {
+function getClassyFromBlockElement(tokens, idx, fullName) {
   var classy,
     lastToken,
-    inlineContents = tokens[idx + 1].children;
+    i,
+    inlineContents;
 
   // in a block element the inline content is always sandwiched
   // between the opening and the closing tags
-  // so we can just peer into that and check if
-  // the last token of the inline content is "classy"
+  // (we look for the last inline token because
+  // that's the one we're interested in for <ul>s and <ol>s)
 
+  for (i = idx; i < tokens.length; i += 1) {
+    if (tokens[i].type === "inline") {
+      inlineContents = tokens[i].children;
+    }
+
+    if (tokens[i].type === fullName + "_close") {
+      break;
+    }
+  }
+
+  // if the last token of the inline content is of type "classy"
+  // we have to do our thing
   if (inlineContents[inlineContents.length - 1].type !== "classy") {
     return null;
   }
@@ -132,7 +147,7 @@ function replaceRenderer(md, renderer) {
     if (renderer.inline) {
       classy = getClassyFromInlineElement(tokens, idx, renderer.fullName);
     } else {
-      classy = getClassyFromBlockElement(tokens, idx);
+      classy = getClassyFromBlockElement(tokens, idx, renderer.fullName);
     }
 
     if (classy) {

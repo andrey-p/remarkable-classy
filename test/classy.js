@@ -31,6 +31,8 @@ describe("remarkable-classy", function () {
   it("should work with strong tags", function () {
     md.render("__foo {bar}__").should.containEql("<strong class=\"bar\">foo</strong>");
   });
-  it("should work with li tags and ul tags");
+  it("should work with ul tags", function () {
+    md.render("- foo\n- baz\n{bar}").should.containEql("<ul class=\"bar\">");
+  });
   it("should work with blockquotes");
 });
