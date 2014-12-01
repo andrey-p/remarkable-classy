@@ -6,6 +6,7 @@ var classy,
     { pattern: "h\\d", fullName: "heading" },
     { pattern: "ul", fullName: "bullet_list" },
     { pattern: "ol", fullName: "ordered_list" },
+    { pattern: "blockquote", fullName: "blockquote" },
     { pattern: "em", fullName: "em", inline: true },
     { pattern: "strong", fullName: "strong", inline: true }
   ],

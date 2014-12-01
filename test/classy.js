@@ -34,5 +34,7 @@ describe("remarkable-classy", function () {
   it("should work with ul tags", function () {
     md.render("- foo\n- baz\n{bar}").should.containEql("<ul class=\"bar\">");
   });
-  it("should work with blockquotes");
+  it("should work with blockquotes", function () {
+    md.render("> foo bar\n{baz}").should.containEql("<blockquote class=\"baz\">");
+  });
 });
