@@ -1,6 +1,8 @@
 remarkable-classy
 ===
 
+**NOTE**: Development for this plugin has been stopped in favour of [markdown-it-classy](https://github.com/andrey-p/markdown-it-classy).
+
 This is a plugin for the [remarkable](https://github.com/jonschlinkert/remarkable) markdown parser.
 
 Need to style some text written with markdown but are lacking that extra *oomph*? Plug in `remarkable-classy` to make your markup remarkable *and* classy.
